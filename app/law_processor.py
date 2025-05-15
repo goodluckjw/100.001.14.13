@@ -546,11 +546,11 @@ def group_locations(loc_list):
 
 
 
-                    # 아래 주석은 14.13 버전의 오리지널 540~545부분에 원래 코드. 가지번호 반환을 못하는 문제로 수정됨.
-                    # 위계 관계가 아닌 동일 레벨의 호목만 가운뎃점으로 연결
-                    # items_str = "ㆍ".join([item if item.startswith("제") else f"제{item}" for item in unique_items])
-                    # 위계 관계에서는 가운뎃점 없이 직접 연결
-                    # loc_str += f"{items_str}"  # 가운뎃점 제거
+                  # 아래 주석은 14.13 버전의 오리지널 540~545부분에 원래 코드. 가지번호 반환을 못하는 문제로 수정됨.
+                  # 위계 관계가 아닌 동일 레벨의 호목만 가운뎃점으로 연결
+                  items_str = "ㆍ".join([item if item.startswith("제") else f"제{item}" for item in unique_items])
+                  # 위계 관계에서는 가운뎃점 없이 직접 연결
+                  loc_str += f"{items_str}"  # 가운뎃점 제거
             
             article_clause_parts.append(loc_str)
         
