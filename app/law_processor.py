@@ -545,9 +545,9 @@ def group_locations(loc_list):
                   loc_str += f"{items_str}"
 
                   # 위계 관계가 아닌 동일 레벨의 호목만 가운뎃점으로 연결
-                  items_str = "ㆍ".join([item if item.startswith("제") else f"제{item}" for item in item if item.startswith("제") else f"제{item}" for item in unique_items]])
+                  # items_str = "ㆍ".join([item if item.startswith("제") else f"제{item}" for item in item if item.startswith("제") else f"제{item}" for item in unique_items]])
                   # 위계 관계에서는 가운뎃점 없이 직접 연결
-                  loc_str += f"{items_str}"  # 가운뎃점 제거
+                  # loc_str += f"{items_str}"  # 가운뎃점 제거
             
             article_clause_parts.append(loc_str)
         
