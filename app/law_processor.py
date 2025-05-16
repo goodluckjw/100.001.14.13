@@ -1,6 +1,6 @@
 # 현재 및을 문장 중간에도 출력하는 문제가 있음
-#호가지문제 해결
-#0515 2000 현재 가장 진보된 버전
+# 호가지문제 해결
+# 0516 2015 현재 가장 진보된 버전은 003
 
 import requests
 import xml.etree.ElementTree as ET
