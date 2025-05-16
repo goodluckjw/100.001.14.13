@@ -476,8 +476,7 @@ def group_locations(loc_list):
             outside_part = " 각 목 외의 부분"
             rest_part = rest_part.replace(" 각 목 외의 부분", "").replace(" 외의 부분", "")
         
- # 다음 부분 수정:
-        # 호목 정보 추출 부분 (약 400-410 라인)
+        # 호목 정보 추출 부분
         item_goal_part = ""
         if "제" in rest_part and ("호" in rest_part or "목" in rest_part):
             # 호 또는 목 정보가 있는 경우
@@ -541,29 +540,23 @@ def group_locations(loc_list):
                         unique_items.append(item)
                 
                 if unique_items:
-        # 가지번호가 있는 경우 주의해서 처리
-                  items_str = "ㆍ".join([
-                      item if item.startswith("제") else f"제{item}" 
-                      for item in unique_items
-                  ])
-                  loc_str += f"{items_str}"
-
-                  # 위계 관계가 아닌 동일 레벨의 호목만 가운뎃점으로 연결
-                  # items_str = "ㆍ".join([item if item.startswith("제") else f"제{item}" for item in item if item.startswith("제") else f"제{item}" for item in unique_items]])
-                  # 위계 관계에서는 가운뎃점 없이 직접 연결
-                  # loc_str += f"{items_str}"  # 가운뎃점 제거
+                    # 가지번호가 있는 경우 주의해서 처리
+                    items_str = "ㆍ".join([
+                        item if item.startswith("제") else f"제{item}" 
+                        for item in unique_items
+                    ])
+                    loc_str += f"{items_str}"
             
             article_clause_parts.append(loc_str)
         
-
-# 같은 조의 여러 항은 콤마로 구분 (기존에는 마지막에 '및' 사용)
-      if len(article_clause_parts) > 1:
-    # 모든 항목을 쉼표로 연결하고, '및'은 사용하지 않음
-          result_parts.append(", ".join(article_clause_parts))
-      else:
-          result_parts.append(article_clause_parts[0])
-
-# 최종 연결 (마지막 부분에만 '및' 사용) - 이 부분은 변경 없음
+        # 같은 조의 여러 항은 콤마로 구분 (기존에는 마지막에 '및' 사용)
+        if len(article_clause_parts) > 1:
+            # 모든 항목을 쉼표로 연결하고, '및'은 사용하지 않음
+            result_parts.append(", ".join(article_clause_parts))
+        else:
+            result_parts.append(article_clause_parts[0])
+    
+    # 최종 연결 (마지막 부분에만 '및' 사용)
     if len(result_parts) > 1:
         return ", ".join(result_parts[:-1]) + f" 및 {result_parts[-1]}"
     elif result_parts:
