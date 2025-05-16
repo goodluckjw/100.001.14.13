@@ -395,171 +395,36 @@ def group_locations(loc_list):
     # 각 위치 문자열에 형식 수정 적용
     formatted_locs = [format_location(loc) for loc in loc_list]
     
-    # 위치 정보 정렬 (사전식)
-    sorted_locs = sorted(formatted_locs, key=parse_location)
-    
-    # 조항별 그룹화 준비
-    article_groups = {}  # 조별 그룹화
-    
-    # 1. 먼저 조별로 항목 분류
-    for loc in sorted_locs:
-        # 조번호 추출
-        article_match = re.match(r'(제\d+조(?:의\d+)?)', loc)
-        if not article_match:
-            continue
-            
-        article_num = article_match.group(1)
-        rest_part = loc[len(article_num):]
-        
-        # 항번호 확인
-        clause_part = ""
-        clause_match = re.search(r'(제\d+항)', rest_part)
-        if clause_match:
-            clause_part = clause_match.group(1)
-            rest_part = rest_part[rest_part.find(clause_part) + len(clause_part):]
-        
-        # 제목 확인
-        title_part = ""
-        if " 제목" in loc:
-            if " 제목 및 본문" in loc:
-                title_part = " 제목 및 본문"
-            else:
-                title_part = " 제목"
-            
-            # 제목 부분 제거
-            rest_part = rest_part.replace(title_part, "")
-            
-        # "각 목 외의 부분" 확인
-        outside_part = ""
-        if " 각 목 외의 부분" in loc or " 외의 부분" in loc:
-            outside_part = " 각 목 외의 부분"
-            rest_part = rest_part.replace(" 각 목 외의 부분", "").replace(" 외의 부분", "")
-        
-        # 호목 정보 추출 부분 - 수정된 부분
-        item_goal_part = ""
-        
-        # 호 패턴 (가지번호 포함)
-        item_pattern = re.search(r'(제\d+호)(?:의(\d+))?', rest_part)
-        if item_pattern:
-            base_item = item_pattern.group(1)
-            item_appendix = item_pattern.group(2)
-            
-            # 가지번호가 있으면 포함해서 구성
-            if item_appendix:
-                item_goal_part = f"{base_item}의{item_appendix}"
-            else:
-                item_goal_part = base_item
-        else:
-            # 목 패턴
-            goal_match = re.search(r'([가-힣])목', rest_part.strip())
-            if goal_match:
-                item_goal_part = f"{goal_match.group(0)}"
-        
-        # 조번호 기준으로 그룹화
-        if article_num not in article_groups:
-            article_groups[article_num] = []
-            
-        # 항과 호목 정보 저장
-        article_groups[article_num].append((clause_part, title_part, outside_part, item_goal_part))
-    
-    # 결과 구성
-    result_parts = []
-    
-    # 조별로 처리
-    for article_num, items in sorted(article_groups.items(), key=lambda x: extract_article_num(x[0])):
-        # 항별로 그룹화 시도
-        clause_groups = {}
-        
-        for clause, title, outside, item in items:
-            key = (clause, title, outside)
-            if key not in clause_groups:
-                clause_groups[key] = []
-                
-            if item:
-                clause_groups[key].append(item)
-        
-        # 같은 항끼리 처리
-        article_clause_parts = []
-        
-        # 항번호 순으로 정렬
-        for (clause, title, outside), item_goals in sorted(clause_groups.items(), 
-                                                      key=lambda x: int(re.search(r'제(\d+)항', x[0][0]).group(1)) if re.search(r'제(\d+)항', x[0][0]) else 0):
-            loc_str = article_num
-            
-            if title:
-                loc_str += title
-                
-            if clause:
-                loc_str += clause
-                
-            if outside:
-                loc_str += outside
-                
-            # 호목 처리
-            if item_goals:
-                # 호목 정렬 후 가운뎃점으로 연결
-                sorted_items = sorted(item_goals, key=lambda x: parse_location(f"{article_num}{clause}{x}"))
-                # 먼저 중복 제거
-                unique_items = []
-                for item in sorted_items:
-                    if item not in unique_items:
-                        unique_items.append(item)
-                
-                if unique_items:
-                    # 가지번호가 있는 경우에도 그대로 보존하여 처리
-                    items_str = "ㆍ".join([
-                        item if item.startswith("제") else f"제{item}" 
-                        for item in unique_items
-                    ])
-                    loc_str += f"{items_str}"
-            
-            article_clause_parts.append(loc_str)
-        
-        # 같은 조의 여러 항은 콤마로 구분하고 마지막은 '및'으로 연결
-        if len(article_clause_parts) > 1:
-            result_parts.append(", ".join(article_clause_parts[:-1]) + f" 및 {article_clause_parts[-1]}")
-        else:
-            result_parts.append(article_clause_parts[0])
-    
-    # 최종 연결 (쉼표로 구분하고 마지막은 '및'으로 연결)
-    if len(result_parts) > 1:
-        return ", ".join(result_parts[:-1]) + f" 및 {result_parts[-1]}"
-    elif result_parts:
-        return result_parts[0]
-    else:
-        return ""
-    
     # 조항호목 파싱 함수 (모든 정렬 기준 추출)
-def parse_location(loc):
-    """위치 정보에서 정렬 기준 추출 (수정된 버전)"""
-    # 조번호 (정수로 변환)
-    article_match = re.search(r'제(\d+)조(?:의(\d+))?', loc)
-    article_num = int(article_match.group(1)) if article_match else 0
-    article_sub = int(article_match.group(2)) if article_match and article_match.group(2) else 0
-    
-    # 항번호 (정수로 변환)
-    clause_match = re.search(r'제(\d+)항', loc)
-    clause_num = int(clause_match.group(1)) if clause_match else 0
-    
-    # 호번호 (정수로 변환) - 가지번호 포함 처리
-    item_match = re.search(r'제(\d+)호(?:의(\d+))?', loc)
-    item_num = int(item_match.group(1)) if item_match else 0
-    item_sub = int(item_match.group(2)) if item_match and item_match.group(2) else 0
-    
-    # 목번호 (가나다 순서)
-    subitem_match = re.search(r'([가-힣])목', loc)
-    subitem_num = ord(subitem_match.group(1)) - ord('가') + 1 if subitem_match else 0
-    
-    # 제목 여부
-    title_match = re.search(r'제목', loc)
-    is_title = 1 if title_match else 0
-    
-    # "각 목 외의 부분" 확인
-    outside_parts = 0
-    if "외의 부분" in loc:
-        outside_parts = 1
+    def parse_location(loc):
+        # 조번호 (정수로 변환)
+        article_match = re.search(r'제(\d+)조(?:의(\d+))?', loc)
+        article_num = int(article_match.group(1)) if article_match else 0
+        article_sub = int(article_match.group(2)) if article_match and article_match.group(2) else 0
         
-    return (article_num, article_sub, clause_num, item_num, item_sub, outside_parts, subitem_num, is_title)
+        # 항번호 (정수로 변환)
+        clause_match = re.search(r'제(\d+)항', loc)
+        clause_num = int(clause_match.group(1)) if clause_match else 0
+        
+        # 호번호 (정수로 변환)
+        item_match = re.search(r'제(\d+)호(?:의(\d+))?', loc)
+        item_num = int(item_match.group(1)) if item_match else 0
+        item_sub = int(item_match.group(2)) if item_match and item_match.group(2) else 0
+        
+        # 목번호 (가나다 순서)
+        subitem_match = re.search(r'([가-힣])목', loc)
+        subitem_num = ord(subitem_match.group(1)) - ord('가') + 1 if subitem_match else 0
+        
+        # 제목 여부
+        title_match = re.search(r'제목', loc)
+        is_title = 1 if title_match else 0
+        
+        # "각 목 외의 부분" 확인
+        outside_parts = 0
+        if "외의 부분" in loc:
+            outside_parts = 1
+            
+        return (article_num, article_sub, clause_num, item_num, item_sub, outside_parts, subitem_num, is_title)
     
     # 위치 정보 정렬 (사전식)
     sorted_locs = sorted(formatted_locs, key=parse_location)
@@ -827,71 +692,66 @@ def run_amendment_logic(find_word, replace_word):
                             replaced = chunk.replace(find_word, replace_word)
                             location = f"{조문식별자}{항번호_부분}{additional_info}"
                             chunk_map[(chunk, replaced, josa, suffix)].append(location)
+                
+                # 호 내용 검색
+                for 호 in 항.findall("호"):
+                    호번호 = 호.findtext("호번호")
+                    
+                    # 가지번호 확인 (예: 제14호의3)
+                    호가지번호 = None
+                    if 호.attrib.get("가지번호"):
+                        호가지번호 = 호.attrib.get("가지번호")
+                    
+                    호내용 = 호.findtext("호내용", "") or ""
+                    if find_word in 호내용:
+                        found_matches += 1
+                        if is_부칙:
+                            found_in_부칙 = True
+                            continue  # 부칙은 검색에서 제외
+                        
+                        # 호번호 표시 (가지번호가 있으면 추가)
+                        호번호_표시 = f"제{호번호}호"
+                        if 호가지번호:
+                            호번호_표시 = f"제{호번호}호의{호가지번호}"
+                            
+                        print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}")
+                        tokens = re.findall(r'[가-힣A-Za-z0-9]+', 호내용)
+                        for token in tokens:
+                            if find_word in token:
+                                chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
+                                replaced = chunk.replace(find_word, replace_word)
+                                location = f"{조문식별자}{항번호_부분}{호번호_표시}"
+                                chunk_map[(chunk, replaced, josa, suffix)].append(location)
 
-                    # 호 내용 검색 부분 수정 (run_amendment_logic 함수 내에서)
-                    for 호 in 항.findall("호"):
-                        호번호 = 호.findtext("호번호")
-                        
-                        # 가지번호 확인 (예: 제14호의3) - 수정된 부분
-                        호가지번호 = None
-                        # 호가지번호 태그가 존재하는지 먼저 확인
-                        if 호.find("호가지번호") is not None:
-                            # 호가지번호는 일반 태그로 존재하므로 findtext로 가져옵니다
-                            호가지번호 = 호.findtext("호가지번호", "").strip()
-                        
-                        호내용 = 호.findtext("호내용", "") or ""
-                        if find_word in 호내용:
-                            found_matches += 1
-                            if is_부칙:
-                                found_in_부칙 = True
-                                continue  # 부칙은 검색에서 제외
-                            
-                            # 호번호 표시 (가지번호가 있으면 추가)
-                            호번호_표시 = f"제{호번호}호"
-                            if 호가지번호:
-                                호번호_표시 = f"제{호번호}호의{호가지번호}"
-                            
-                            print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}")
-                            tokens = re.findall(r'[가-힣A-Za-z0-9]+', 호내용)
-                            for token in tokens:
-                                if find_word in token:
-                                    chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
-                                    replaced = chunk.replace(find_word, replace_word)
-                                    location = f"{조문식별자}{항번호_부분}{호번호_표시}"
-                                    chunk_map[(chunk, replaced, josa, suffix)].append(location)
-                        
-                        # 목 내용 검색
-                        for 목 in 호.findall("목"):
-                            목번호 = 목.findtext("목번호")
-                            for m in 목.findall("목내용"):
-                                if not m.text:
-                                    continue
+                    # 목 내용 검색
+                    for 목 in 호.findall("목"):
+                        목번호 = 목.findtext("목번호")
+                        for m in 목.findall("목내용"):
+                            if not m.text:
+                                continue
                                 
-                                if find_word in m.text:
-                                    found_matches += 1
-                                    if is_부칙:
-                                        found_in_부칙 = True
-                                        continue  # 부칙은 검색에서 제외
+                            if find_word in m.text:
+                                found_matches += 1
+                                if is_부칙:
+                                    found_in_부칙 = True
+                                    continue  # 부칙은 검색에서 제외
+                                
+                                # 호번호 표시 (가지번호가 있으면 추가)
+                                호번호_표시 = f"제{호번호}호"
+                                if 호가지번호:
+                                    호번호_표시 = f"제{호번호}호의{호가지번호}"
                                     
-                                    # 호번호 표시 (가지번호가 있으면 추가)
-                                    호번호_표시 = f"제{호번호}호"
-                                    if 호가지번호:
-                                        호번호_표시 = f"제{호번호}호의{호가지번호}"
-                                    
-                                    print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}{목번호}목")
-                                    줄들 = [line.strip() for line in m.text.splitlines() if line.strip()]
-                                    for 줄 in 줄들:
-                                        if find_word in 줄:
-                                            tokens = re.findall(r'[가-힣A-Za-z0-9]+', 줄)
-                                            for token in tokens:
-                                                if find_word in token:
-                                                    chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
-                                                    replaced = chunk.replace(find_word, replace_word)
-                                                    location = f"{조문식별자}{항번호_부분}{호번호_표시}{목번호}목"
-                                                    chunk_map[(chunk, replaced, josa, suffix)].append(location)
-
-        
-
+                                print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}{목번호}목")
+                                줄들 = [line.strip() for line in m.text.splitlines() if line.strip()]
+                                for 줄 in 줄들:
+                                    if find_word in 줄:
+                                        tokens = re.findall(r'[가-힣A-Za-z0-9]+', 줄)
+                                        for token in tokens:
+                                            if find_word in token:
+                                                chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
+                                                replaced = chunk.replace(find_word, replace_word)
+                                                location = f"{조문식별자}{항번호_부분}{호번호_표시}{목번호}목"
+                                                chunk_map[(chunk, replaced, josa, suffix)].append(location)
 
         # 검색 결과가 없으면 다음 법률로
         if not chunk_map:
