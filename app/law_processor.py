@@ -540,8 +540,7 @@ def group_locations(loc_list):
         # 가지번호가 있는 경우 주의해서 처리
                     items_str = "ㆍ".join([
                         item if item.startswith("제") else f"제{item}" 
-                        for item in unique_items
-                    ])
+                        for item in unique_items])
                     loc_str += f"{items_str}"
 
                   # 위계 관계가 아닌 동일 레벨의 호목만 가운뎃점으로 연결
