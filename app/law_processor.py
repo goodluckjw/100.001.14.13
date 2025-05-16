@@ -834,8 +834,10 @@ def run_amendment_logic(find_word, replace_word):
     
     # 가지번호 확인 (예: 제14호의3) - 수정된 부분
                 호가지번호 = None
+    # 호가지번호 태그가 존재하는지 먼저 확인
+                if 호.find("호가지번호") is not None:
     # 호가지번호는 일반 태그로 존재하므로 findtext로 가져옵니다
-                호가지번호 = 호.findtext("호가지번호", "").strip()
+                    호가지번호 = 호.findtext("호가지번호", "").strip()
     
                 호내용 = 호.findtext("호내용", "") or ""
                 if find_word in 호내용:
