@@ -549,21 +549,19 @@ def group_locations(loc_list):
             
             article_clause_parts.append(loc_str)
         
-        # 같은 조의 여러 항은 콤마로 구분 (기존에는 마지막에 '및' 사용)
-        if len(article_clause_parts) > 1:
-            # 모든 항목을 쉼표로 연결하고, '및'은 사용하지 않음
-            result_parts.append(", ".join(article_clause_parts))
-        else:
-            result_parts.append(article_clause_parts[0])
+        # 결과에 조별 정보 추가 - 각 조는 쉼표로 연결
+        if article_clause_parts:
+            result_parts.extend(article_clause_parts)
     
-    # 최종 연결 (마지막 부분에만 '및' 사용)
-    if len(result_parts) > 1:
-        return ", ".join(result_parts[:-1]) + f" 및 {result_parts[-1]}"
-    elif result_parts:
-        return result_parts[0]
+    # 최종 결과 반환 - 모든 위치 정보를 평면적인 목록으로 다루고, 마지막 항목 앞에만 '및' 사용
+    if result_parts:
+        if len(result_parts) == 1:
+            return result_parts[0]
+        else:
+            # 마지막 항목 앞에만 '및' 사용, 나머지는 쉼표로 연결
+            return ", ".join(result_parts[:-1]) + f" 및 {result_parts[-1]}"
     else:
         return ""
-
 def run_amendment_logic(find_word, replace_word):
     """개정문 생성 로직"""
     amendment_results = []
