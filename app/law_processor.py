@@ -642,23 +642,23 @@ def run_amendment_logic(find_word, replace_word):
                 
                 # 제목 검색어만 처리하도록 수정
                 if 제목에_검색어_있음:
-                      tokens = re.findall(r'[가-힣A-Za-z0-9]+', 조문제목)
-                      for token in tokens:
-                          if find_word in token:
-                               chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
-                               replaced = chunk.replace(find_word, replace_word)
-                               location = f"{조문식별자} 제목"
-                               chunk_map[(chunk, replaced, josa, suffix)].append(location)
+                    tokens = re.findall(r'[가-힣A-Za-z0-9]+', 조문제목)
+                    for token in tokens:
+                        if find_word in token:
+                            chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
+                            replaced = chunk.replace(find_word, replace_word)
+                            location = f"{조문식별자} 제목"
+                            chunk_map[(chunk, replaced, josa, suffix)].append(location)
                     # 제목에 검색어가 있는 경우 본문은 처리하지 않음
                 elif 본문에_검색어_있음:  # elif로 변경하여 중복 검색 방지
-                     print(f"매치 발견: {조문식별자}")
-                     tokens = re.findall(r'[가-힣A-Za-z0-9]+', 조문내용)
-                     for token in tokens:
+                    print(f"매치 발견: {조문식별자}")
+                    tokens = re.findall(r'[가-힣A-Za-z0-9]+', 조문내용)
+                    for token in tokens:
                         if find_word in token:
-                           chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
-                           replaced = chunk.replace(find_word, replace_word)
-                           location = f"{조문식별자}"
-                           chunk_map[(chunk, replaced, josa, suffix)].append(location)
+                            chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
+                            replaced = chunk.replace(find_word, replace_word)
+                            location = f"{조문식별자}"
+                            chunk_map[(chunk, replaced, josa, suffix)].append(location)
 
             # 항 내용 검색
             for 항 in article.findall("항"):
@@ -695,43 +695,18 @@ def run_amendment_logic(find_word, replace_word):
 
                 # 호 내용 검색 부분 수정
                 for 호 in 항.findall("호"):
-                  호번호 = 호.findtext("호번호", "").strip()
+                    호번호 = 호.findtext("호번호", "").strip()
     
                # 가지번호 확인 - XML에서 호가지번호 태그를 직접 찾도록 수정
-                  호가지번호 = 호.findtext("호가지번호", "").strip()
+                    호가지번호 = 호.findtext("호가지번호", "").strip()
     
-                  호내용 = 호.findtext("호내용", "") or ""
-                  if find_word in 호내용:
+                    호내용 = 호.findtext("호내용", "") or ""
+                    if find_word in 호내용:
                 # 호번호 표시 (가지번호가 있으면 추가)
                     호번호_표시 = f"제{호번호}호"
                     if 호가지번호:
-                       호번호_표시 = f"제{호번호}호의{호가지번호}"
-          
-                # 호 내용 검색
-                #for 호 in 항.findall("호"):
-                #    호번호 = 호.findtext("호번호")
-                    
-                    # 가지번호 확인 (예: 제14호의3)
-                 #   호가지번호 = None
-                  #  if 호.attrib.get("가지번호"):
-                   #     호가지번호 = 호.attrib.get("가지번호")
-                    
-                    #호내용 = 호.findtext("호내용", "") or ""
-                    #if find_word in 호내용:
-                     #   found_matches += 1
-                      #  if is_부칙:
-                       #     found_in_부칙 = True
-                        #    continue  # 부칙은 검색에서 제외
-                        
-                        # 호번호 표시 (가지번호가 있으면 추가)
-                        #호번호_표시 = f"제{호번호}호"
-                        #if 호가지번호:
-                        #   호번호_표시 = f"제{호번호}호의{호가지번호}"
-
-
-
-
-                      
+                        호번호_표시 = f"제{호번호}호의{호가지번호}"
+                            
                         print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}")
                         tokens = re.findall(r'[가-힣A-Za-z0-9]+', 호내용)
                         for token in tokens:
