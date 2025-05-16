@@ -10,7 +10,12 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app"))
 processor_path = os.path.join(base_dir, "law_processor.py")
 spec = importlib.util.spec_from_file_location("law_processor", processor_path)
 law_processor = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(law_processor)
+try:
+    spec.loader.exec_module(law_processor)
+except Exception as e:
+    print(f"Error loading module: {e}")
+    import traceback
+    traceback.print_exc()
 
 run_amendment_logic = law_processor.run_amendment_logic
 # run_search_logic = lambda q, u: {}  # placeholder (기본형에서 미사용)
