@@ -828,67 +828,67 @@ def run_amendment_logic(find_word, replace_word):
                             location = f"{조문식별자}{항번호_부분}{additional_info}"
                             chunk_map[(chunk, replaced, josa, suffix)].append(location)
 
-            # 호 내용 검색 부분 수정 (run_amendment_logic 함수 내에서)
-            for 호 in 항.findall("호"):
-                호번호 = 호.findtext("호번호")
+# 호 내용 검색 부분 수정 (run_amendment_logic 함수 내에서)
+for 호 in 항.findall("호"):
+    호번호 = 호.findtext("호번호")
     
     # 가지번호 확인 (예: 제14호의3) - 수정된 부분
-                호가지번호 = None
+    호가지번호 = None
     # 호가지번호 태그가 존재하는지 먼저 확인
-                if 호.find("호가지번호") is not None:
-    # 호가지번호는 일반 태그로 존재하므로 findtext로 가져옵니다
-                    호가지번호 = 호.findtext("호가지번호", "").strip()
+    if 호.find("호가지번호") is not None:
+        # 호가지번호는 일반 태그로 존재하므로 findtext로 가져옵니다
+        호가지번호 = 호.findtext("호가지번호", "").strip()
     
-                호내용 = 호.findtext("호내용", "") or ""
-                if find_word in 호내용:
-                    found_matches += 1
-                    if is_부칙:
-                        found_in_부칙 = True
-                        continue  # 부칙은 검색에서 제외
+    호내용 = 호.findtext("호내용", "") or ""
+    if find_word in 호내용:
+        found_matches += 1
+        if is_부칙:
+            found_in_부칙 = True
+            continue  # 부칙은 검색에서 제외
         
         # 호번호 표시 (가지번호가 있으면 추가)
-                    호번호_표시 = f"제{호번호}호"
-                    if 호가지번호:
-                        호번호_표시 = f"제{호번호}호의{호가지번호}"
-            
-                    print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}")
-                    tokens = re.findall(r'[가-힣A-Za-z0-9]+', 호내용)
-                    for token in tokens:
-                        if find_word in token:
-                            chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
-                            replaced = chunk.replace(find_word, replace_word)
-                            location = f"{조문식별자}{항번호_부분}{호번호_표시}"
-                            chunk_map[(chunk, replaced, josa, suffix)].append(location)
-
+        호번호_표시 = f"제{호번호}호"
+        if 호가지번호:
+            호번호_표시 = f"제{호번호}호의{호가지번호}"
+        
+        print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}")
+        tokens = re.findall(r'[가-힣A-Za-z0-9]+', 호내용)
+        for token in tokens:
+            if find_word in token:
+                chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
+                replaced = chunk.replace(find_word, replace_word)
+                location = f"{조문식별자}{항번호_부분}{호번호_표시}"
+                chunk_map[(chunk, replaced, josa, suffix)].append(location)
+    
     # 목 내용 검색
-                for 목 in 호.findall("목"):
-                    목번호 = 목.findtext("목번호")
-                    for m in 목.findall("목내용"):
-                        if not m.text:
-                            continue
-                
-                        if find_word in m.text:
-                            found_matches += 1
-                            if is_부칙:
-                                found_in_부칙 = True
-                                continue  # 부칙은 검색에서 제외
+    for 목 in 호.findall("목"):
+        목번호 = 목.findtext("목번호")
+        for m in 목.findall("목내용"):
+            if not m.text:
+                continue
+            
+            if find_word in m.text:
+                found_matches += 1
+                if is_부칙:
+                    found_in_부칙 = True
+                    continue  # 부칙은 검색에서 제외
                 
                 # 호번호 표시 (가지번호가 있으면 추가)
-                            호번호_표시 = f"제{호번호}호"
-                            if 호가지번호:
-                                호번호_표시 = f"제{호번호}호의{호가지번호}"
-                    
-                            print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}{목번호}목")
-                            줄들 = [line.strip() for line in m.text.splitlines() if line.strip()]
-                            for 줄 in 줄들:
-                                if find_word in 줄:
-                                    tokens = re.findall(r'[가-힣A-Za-z0-9]+', 줄)
-                                    for token in tokens:
-                                        if find_word in token:
-                                            chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
-                                            replaced = chunk.replace(find_word, replace_word)
-                                            location = f"{조문식별자}{항번호_부분}{호번호_표시}{목번호}목"
-                                            chunk_map[(chunk, replaced, josa, suffix)].append(location)
+                호번호_표시 = f"제{호번호}호"
+                if 호가지번호:
+                    호번호_표시 = f"제{호번호}호의{호가지번호}"
+                
+                print(f"매치 발견: {조문식별자}{항번호_부분}{호번호_표시}{목번호}목")
+                줄들 = [line.strip() for line in m.text.splitlines() if line.strip()]
+                for 줄 in 줄들:
+                    if find_word in 줄:
+                        tokens = re.findall(r'[가-힣A-Za-z0-9]+', 줄)
+                        for token in tokens:
+                            if find_word in token:
+                                chunk, josa, suffix = extract_chunk_and_josa(token, find_word)
+                                replaced = chunk.replace(find_word, replace_word)
+                                location = f"{조문식별자}{항번호_부분}{호번호_표시}{목번호}목"
+                                chunk_map[(chunk, replaced, josa, suffix)].append(location)
 
         
 
