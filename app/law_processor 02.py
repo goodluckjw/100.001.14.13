@@ -1,3 +1,5 @@
+# 현재 호가지번호를 못읽는 문제, 및을 문장 중간에도 출력하는 문제가 있으나 0515 1812 현재 가장 진보된 버전
+
 import requests
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
